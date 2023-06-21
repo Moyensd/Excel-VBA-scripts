@@ -1,0 +1,190 @@
+Sub Next_day_Audit_macro()
+    Dim ws As Worksheet
+    Dim rng As Range
+    Dim currentFilters As Variant
+    Dim columnM As Range
+    Dim columnK As Range
+    Dim LastRow As Long
+    Dim dataRange As Range
+    Dim cell As Range
+    Dim lookupValue As Variant
+    Dim lookupRange As Range
+    Dim result As Variant
+
+    Dim newSheet1 As Worksheet
+    Dim newSheet2 As Worksheet
+    Dim currentSheet As Worksheet
+    
+  
+    Dim wb As Workbook
+    Set wb = ActiveWorkbook
+    
+    
+    Set currentSheet = ActiveSheet
+    
+    ' Add a new sheet and rename it to "APPOINTMENT DETAILS HERE"
+    Set newSheet1 = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count))
+    newSheet1.Name = "APPOINTMENTDETAILSHERE"
+    
+    ' Add another new sheet and rename it to "CONTRACTCOLLECTION DETAILS HERE"
+    Set newSheet2 = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count))
+    newSheet2.Name = "COLLECTIONDETAILSHERE"
+    
+   
+    currentSheet.Activate
+    
+    Set ws = currentSheet
+    
+    Set rng = ws.Range("A4:Z" & ws.Cells(ws.Rows.Count, "F").End(xlUp).Row)
+
+   
+    If ws.AutoFilterMode Then
+
+        currentFilters = ws.AutoFilter.Range.Rows(1).Value
+
+    End If
+
+    'check what column ortho field is in
+
+    rng.AutoFilter Field:=8, Criteria1:="ORTHOC*", Operator:=xlFilterValues
+       
+
+        If Not IsEmpty(currentFilters) Then
+
+        ws.AutoFilter.Range.Rows(1).Value = currentFilters
+
+    End If
+
+   
+    Set ws = ActiveSheet
+
+
+    Set columnM = ws.Range("M:M")
+    columnM.Insert Shift:=xlToRight
+    Set columnK = ws.Range("L:L")
+    columnK.Resize(, 2).Insert Shift:=xlToRight
+  
+
+    Set ws = ActiveSheet
+
+   
+
+    LastRow = ws.Cells(ws.Rows.Count, "K").End(xlUp).Row
+    LastRow = Cells(Rows.Count, "K").End(xlUp).Row
+
+
+    ' Loop through each cell in Column K
+
+    For i = 1 To LastRow
+
+        originalValue = Cells(i, "K").Value
+
+        If Len(originalValue) >= 2 Then
+
+            ' Remove the last 2 letters
+
+            Cells(i, "L").Value = Left(originalValue, Len(originalValue) - 2)
+
+        Else
+
+            ' If the cell has less than 2 letters, copy the original value as it is
+
+            Cells(i, "L").Value = originalValue
+
+        End If
+
+    Next i
+
+
+    LastRow = ws.Cells(ws.Rows.Count, "L").End(xlUp).Row
+
+    ' Set the range to copy and modify the data (starting from row 5)
+
+    Set dataRange = ws.Range("L5:L" & LastRow)
+
+
+    ' Set the lookup range in APPOINTMENT DETAILS HERE column A
+
+    Set ws = ActiveSheet
+
+    LastRow = ws.Cells(ws.Rows.Count, "K").End(xlUp).Row
+
+    Set dataRange = ws.Range("L5:L" & LastRow)
+
+   
+
+    ' CHANGE WHAT SHEET PIF RCC CHECKS FOR
+    Set lookupRange = ActiveWorkbook.Sheets("COLLECTIONDETAILSHERE").Range("A:C")
+
+   
+
+    ' Set the range to apply the formula (column O, same rows as column K)
+    Set formulaRange = ws.Range("M5:M" & LastRow)
+
+   
+
+    ' Apply the formula to the range
+    formulaRange.Formula = "=IF(ISNA(VLOOKUP(L5,COLLECTIONDETAILSHERE!A:C,1,FALSE)),""PIF   "",""RCC"")"
+
+
+    Set ws = ActiveSheet
+
+
+    LastRow = ws.Cells(ws.Rows.Count, "K").End(xlUp).Row
+
+   
+
+    ' CHANGE WHAT SHEET PIF RCC CHECKS FOR
+    Set lookupRange = ActiveWorkbook.Sheets("APPOINTMENTDETAILSHERE").Range("A:C")
+
+
+
+    Set formulaRange = ws.Range("O5:O" & LastRow)
+
+   
+
+    formulaRange.Formula = "=IF(ISNA(VLOOKUP(K5,APPOINTMENTDETAILSHERE!A:C,1,FALSE)),""missing"",""done"")"
+
+    Cells.Select
+
+    With Selection
+
+        .HorizontalAlignment = xlGeneral
+        .VerticalAlignment = xlBottom
+        .WrapText = False
+        .Orientation = 0
+        .AddIndent = False
+        .IndentLevel = 0
+        .ShrinkToFit = False
+        .ReadingOrder = xlContext
+        .MergeCells = False
+
+    End With
+
+    Cells.EntireColumn.AutoFit
+    
+    
+    Columns("N:N").Select
+
+    Selection.ColumnWidth = 32
+    
+    With Selection
+        .HorizontalAlignment = xlLeft
+        .VerticalAlignment = xlBottom
+        .WrapText = False
+        .Orientation = 0
+        .AddIndent = False
+        .IndentLevel = 0
+        .ShrinkToFit = False
+        .ReadingOrder = xlContext
+        .MergeCells = False
+    End With
+    
+    Dim col As Range
+    
+    'Hide these ranges
+    'Set col = ws.Range("M:M")
+    'col.EntireColumn.Hidden = True
+   
+
+End Sub
