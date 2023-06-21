@@ -1,0 +1,43 @@
+Sub AddSheet()
+    Application.ScreenUpdating = False
+    
+    ' CHANGE NAME FROM TEST SHEET
+    '
+    Dim templateSheet As Worksheet
+    On Error Resume Next
+    Set templateSheet = Worksheets("Template")
+    On Error GoTo 0
+    
+    If templateSheet Is Nothing Then
+        MsgBox "Template worksheet is missing.", vbCritical
+        Exit Sub
+    End If
+    
+    Worksheets("Test").Activate
+    Dim bottomA As Integer
+    bottomA = Range("K" & Rows.Count).End(xlUp).Row
+    Dim c As Range
+    Dim ws As Worksheet
+    
+    For Each c In Range("K5:K" & bottomA)
+       If Not c.EntireRow.Hidden Then
+           Set ws = Nothing
+           On Error Resume Next
+           Set ws = Worksheets(c.Value)
+           On Error GoTo 0
+           If ws Is Nothing Then
+               templateSheet.Copy After:=Sheets(Sheets.Count)
+               ActiveSheet.Name = c.Value
+               ActiveSheet.Range("C3") = c.Value
+               
+               ' CHANGE NAME FROM TEST SHEET
+               '
+               ActiveSheet.Range("C4") = ("=INDEX(TEST!J:J, MATCH(C3, TEST!K:K, 0))")
+               ActiveSheet.Range("D3") = ("=INDEX(TEST!I:I, MATCH(C3, TEST!K:K, 0))")
+           End If
+       End If
+    Next c
+    
+    Application.ScreenUpdating = True
+    Sheets("Template").Select
+End Sub
